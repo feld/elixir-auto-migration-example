@@ -10,7 +10,13 @@ defmodule Example.MixProject do
       compilers: [:gettext] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
-      deps: deps()
+      deps: deps(),
+      releases: [
+        example: [
+          include_executables_for: [:unix],
+          steps: [:assemble, &copy_files/1]
+        ]
+      ]
     ]
   end
 
@@ -66,5 +72,10 @@ defmodule Example.MixProject do
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
       "assets.deploy": ["esbuild default --minify", "phx.digest"]
     ]
+  end
+
+  defp copy_files(%{path: target_path} = release) do
+    File.cp_r!("./rel/files", target_path)
+    release
   end
 end
